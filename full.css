@@ -1,0 +1,7 @@
+.full {
+    background: url('http://static.tumblr.com/90akxpv/ugOo9jdz3/01.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    -o-background-size: cover;
+}
