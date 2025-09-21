@@ -1,11 +1,141 @@
-<html>
-    <head>
-        <title>Counter-Strike</title>
-        </head>
-        <body>
-            <h1>Counter-Strike</h1>
-            <p>Counter-Strike (CS) is a series of multiplayer first-person shooter video games, in which teams</p>
-            <a href="https://ochir.cc/cs/och.zip">download config</a>
-            <a href="/cs">aaa</a>    
-            </body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Counter-Strike — Animated</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0e11; --accent:#f2c94c; --danger:#ff4b4b; --muted:#9aa4ad;
+    }
+    html,body{height:100%;margin:0;background:radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.02), transparent 10%), linear-gradient(180deg,#061017 0%, #0b0e11 70%); color:#e6eef6; font-family: 'Oswald', system-ui, sans-serif;}
+
+    /* Container layout */
+    .wrap{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:40px}
+
+    /* Big logo */
+    .logo{font-size:88px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);text-shadow:0 2px 8px rgba(0,0,0,0.7), 0 0 30px rgba(242,201,76,0.06);display:flex;align-items:center;gap:18px}
+    .logo .cs{font-weight:700;transform:skewX(-8deg);}
+    .logo .strike{font-weight:300;font-size:34px;color:#cbd6df;transform:translateY(6px);}
+
+    /* Glitch + flicker effect */
+    .glitch{position:relative;display:inline-block}
+    .glitch::before, .glitch::after{content:attr(data-text);position:absolute;left:0;top:0;overflow:hidden;clip:rect(0,900px,0,0)}
+    .glitch::before{animation:glitchTop 2.5s infinite linear;color:#fff;opacity:0.9;}
+    .glitch::after{animation:glitchBottom 3.1s infinite linear;color:var(--danger);opacity:0.8}
+    @keyframes glitchTop{0%{clip:rect(0,900px,0,0);transform:translate(0)}5%{clip:rect(6px,9999px,44px,0);transform:translate(-4px,-2px)}10%{clip:rect(0,9999px,0,0);transform:translate(0)}50%{clip:rect(0,9999px,0,0)}100%{clip:rect(0,9999px,0,0)}}
+    @keyframes glitchBottom{0%{clip:rect(0,900px,0,0)}7%{clip:rect(40px,9999px,90px,0);transform:translate(6px,2px)}12%{clip:rect(0,9999px,0,0)}60%{clip:rect(0,9999px,0,0)}100%{clip:rect(0,9999px,0,0)}}
+
+    /* Subtitle */
+    .sub{font-family:'Share Tech Mono', monospace;color:var(--muted);margin-top:8px;letter-spacing:1px}
+
+    /* Menu */
+    .menu{display:flex;gap:20px;margin-top:28px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px 20px;border-radius:8px;text-decoration:none;color:inherit;font-weight:600;display:inline-flex;align-items:center;gap:10px;backdrop-filter: blur(2px);transition:all .22s cubic-bezier(.2,.9,.3,1);position:relative}
+    .btn:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .btn.download{border-color:rgba(242,201,76,0.9);color:var(--bg);background:linear-gradient(90deg,var(--accent),#f59e2f);padding-right:26px}
+    .btn .badge{font-family:'Share Tech Mono';font-size:11px;padding:4px 6px;border-radius:4px;background:rgba(0,0,0,0.25);}
+
+    /* HUD panel */
+    .hud{position:absolute;right:28px;top:28px;padding:12px 14px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.1));border:1px solid rgba(255,255,255,0.04);font-family:'Share Tech Mono';font-size:13px;color:var(--muted)}
+
+    /* Scanlines */
+    .scanlines::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);background-size:100% 4px;mix-blend-mode:overlay;opacity:0.6}
+
+    /* Particle canvas */
+    canvas.particles{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
+
+    /* Footer small */
+    footer{position:absolute;left:18px;bottom:18px;color:var(--muted);font-family:'Share Tech Mono';font-size:12px}
+
+    /* Responsive */
+    @media (max-width:640px){.logo{font-size:44px}.logo .strike{display:none}.menu{flex-direction:column;gap:12px}}
+
+  </style>
+</head>
+<body>
+  <div class="wrap scanlines">
+    <canvas class="particles" id="particles"></canvas>
+
+    <div style="z-index:2;text-align:center;">
+      <div class="logo glitch" data-text="COUNTER-STRIKE">
+        <span class="cs">Counter-</span>
+        <span class="cs">Strike</span>
+        <span class="strike">GLOBAL OFFENSIVE</span>
+      </div>
+      <div class="sub">Inspired UI — animated, browser-only demo</div>
+
+      <div class="menu" style="justify-content:center;">
+        <a class="btn" href="/cs">Home <span class="badge">/cs</span></a>
+        <a class="btn download" href="https://ochir.cc/cs/och.zip" download>Download Config <span class="badge">ZIP</span></a>
+        <a class="btn" href="/cs">Server <span class="badge">LAN</span></a>
+      </div>
+    </div>
+
+    <div class="hud" style="z-index:2">
+      <div>HOST: <strong>127.0.0.1</strong></div>
+      <div>STATUS: <strong style="color:var(--accent)">ONLINE</strong></div>
+      <div>PLAYERS: <strong>12 / 32</strong></div>
+      <div style="margin-top:8px">MAP: <strong>de_dust2</strong></div>
+    </div>
+
+    <footer style="z-index:2">Built for demo — press <kbd style="background:#0b0e11;padding:3px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.04);">Esc</kbd> to toggle HUD</footer>
+  </div>
+
+  <script>
+    // Particles - simple floating dust/smoke
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+    function resize(){w = canvas.width = innerWidth; h = canvas.height = innerHeight}
+    window.addEventListener('resize', resize);
+    resize();
+
+    function rand(min,max){return Math.random()*(max-min)+min}
+    function makeParticle(){return {
+      x: rand(0,w), y: rand(0,h), vx: rand(-0.1,0.1), vy: rand(-0.3,-0.05), r: rand(10,60), a: rand(0.02,0.2), rotate: rand(0,360)
+    }}
+    for(let i=0;i<60;i++) particles.push(makeParticle());
+
+    function draw(){ctx.clearRect(0,0,w,h);
+      // vignette
+      const grd = ctx.createLinearGradient(0,0,0,h);
+      grd.addColorStop(0,'rgba(0,0,0,0)'); grd.addColorStop(1,'rgba(0,0,0,0.35)');
+      ctx.fillStyle = grd; ctx.fillRect(0,0,w,h);
+
+      for(let p of particles){
+        p.x += p.vx; p.y += p.vy; p.rotate += 0.05;
+        if(p.y < -80){ Object.assign(p, makeParticle()); p.y = h + 80 }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(0.35, p.a));
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.rotate*Math.PI/180);
+        // soft radial smoke
+        const g = ctx.createRadialGradient(0,0,p.r*0.1,0,0,p.r);
+        g.addColorStop(0,'rgba(255,255,255,0.06)'); g.addColorStop(0.4,'rgba(200,200,200,0.02)'); g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // HUD toggle with Esc
+    const hud = document.querySelector('.hud');
+    document.addEventListener('keydown', e=>{if(e.key==='Escape') hud.style.display = hud.style.display === 'none' ? 'block' : 'none'});
+
+    // Tiny random flicker for logo (simulate CRT / ambient)
+    const logo = document.querySelector('.logo');
+    setInterval(()=>{logo.style.opacity = (0.85 + Math.random()*0.2).toFixed(2)}, 180);
+
+    // Make download link pulse when hovered
+    const dl = document.querySelector('.download');
+    dl.addEventListener('mouseenter', ()=>{dl.animate([{transform:'scale(1)'},{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:420,iterations:1})});
+
+    // Small accessibility: focus outlines for keyboard users
+    document.addEventListener('keyup', e=>{if(e.key==='Tab') document.documentElement.style.scrollBehavior='smooth'});
+  </script>
+</body>
 </html>
