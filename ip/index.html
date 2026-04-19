@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;transition:.3s}
+body.light{background:linear-gradient(135deg,#eef2ff,#f8fafc);color:#111}
+body.dark{background:#0f172a;color:#e5e7eb}
+
+.card{background:rgba(255,255,255,.78);padding:20px;border-radius:18px;box-shadow:0 10px 32px rgba(15,23,42,.12);width:100%;max-width:760px;backdrop-filter:blur(14px);overflow:hidden}
+body.dark .card{background:rgba(30,41,59,.78)}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.toolbar-right{display:flex;align-items:center;gap:10px}
+.lang-picker{display:flex;gap:6px}
+.lang-btn,.advanced-btn{padding:7px 10px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#111;cursor:pointer}
+.lang-btn.active{background:#e0e7ff;border-color:#6366f1}
+body.dark .lang-btn,body.dark .advanced-btn{background:#0f172a;color:#e5e7eb;border-color:#475569}
+body.dark .lang-btn.active{background:#312e81;border-color:#818cf8}
+
+.toggle{display:flex;justify-content:flex-end}
+.switch{width:50px;height:26px;background:#ddd;border-radius:999px;position:relative;cursor:pointer}
+.switch::after{content:"☀";position:absolute;width:22px;height:22px;top:2px;left:2px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;transition:.3s}
+body.dark .switch{background:#334155}
+body.dark .switch::after{content:"☾";transform:translateX(24px)}
+
+.ip-row{display:flex;gap:6px;margin-bottom:12px;width:100%;align-items:center}
+.ip-row input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid #cbd5e1;text-align:center}
+.ip-row input.invalid{border-color:#ef4444;background:#fee2e2}
+.slash{font-weight:700}
+
+.actions{display:flex;gap:8px;margin-top:10px}
+.copy-btn{flex:1;padding:9px;border:none;border-radius:8px;background:#4f46e5;color:white;cursor:pointer;font-size:13px}
+
+.result{margin-top:14px;font-size:13px;line-height:1.65}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
+.private{background:#22c55e22;color:#15803d}
+.shared{background:#f59e0b22;color:#b45309}
+.public{background:#6366f122;color:#4338ca}
+
+.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px}
+.summary-grid div{min-width:0}
+.binary-panel{margin-top:14px;padding-top:10px;border-top:1px dashed #cbd5e1}
+.binary-row{display:grid;grid-template-columns:110px 1fr;gap:10px;font-family:Consolas,"Courier New",monospace;font-size:12px;align-items:start}
+.binary-row + .binary-row{margin-top:6px}
+.binary-label{font-weight:700}
+.binary-value{word-break:break-all}
+.meta{margin-top:12px;padding-top:10px;border-top:1px dashed #cbd5e1;font-size:12px}
+.flag{font-size:18px;margin-right:6px}
+.status{margin-top:8px;font-size:12px;color:#64748b}
+body.dark .status{color:#94a3b8}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:640px){
+  .card{padding:16px}
+  .toolbar,.toolbar-right,.actions{flex-direction:column;align-items:stretch}
+  .summary-grid{grid-template-columns:1fr}
+  .binary-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="light">
+
+<div class="card">
+  <div class="toolbar">
+    <h3 id="title" style="margin:0">IP Calculator</h3>
+    <div class="toolbar-right">
+      <div class="lang-picker">
+        <button id="langMn" class="lang-btn" onclick="changeLanguage('mn')">🇲🇳</button>
+        <button id="langEn" class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button>
+      </div>
+      <div class="toggle"><div class="switch" onclick="toggleTheme()"></div></div>
+    </div>
+  </div>
+
+  <div class="ip-row">
+    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
+    <span class="slash">/</span>
+    <input id="cidr" maxlength="2" style="width:56px;text-align:center" placeholder="32" oninput="calculate()" onkeydown="nav(event,this)">
+  </div>
+
+  <div id="output" class="result"></div>
+  <div class="actions">
+    <button id="copyBtn" class="copy-btn" onclick="copyIP()">Copy IP</button>
+  </div>
+  <div id="status" class="status"></div>
+</div>
+
+<div id="toast" class="toast">Copied ✓</div>
+
+<script>
+const ipInputs=()=>Array.from(document.querySelectorAll('.ip-part'));
+const ipInfoBucketCache=new Map();
+let currentLanguage='mn';
+let advancedOpen=false;
+
+const translations={
+  en:{
+    title:'IP Calculator',
+    copy:'Copy IP',
+    copied:'Copied ✓',
+    copyFailed:'Copy failed',
+    invalid:'Enter a valid IPv4 address and CIDR.',
+    statusReady:'Local lookup uses ipinfo.json only.',
+    statusNoInfo:'No country/ASN match found in local ipinfo.json.',
+    badgePrivate:'Private Internet',
+    badgeShared:'Shared Address Space',
+    badgePublic:'Public Internet',
+    addressClass:'Class',
+    subnetMask:'Subnet Mask',
+    wildcard:'Wildcard Mask',
+    network:'Network',
+    broadcast:'Broadcast',
+    range:'Usable Range',
+    hosts:'Usable Hosts',
+    hostCapacity:'Host Capacity',
+    hostUsage:'Usable host addresses in this subnet',
+    advancedView:'Advanced View',
+    showAdvanced:'Show Advanced View',
+    hideAdvanced:'Hide Advanced View',
+    addressCount:'Total Addresses',
+    category:'Address Type',
+    binary:'Binary View',
+    address:'Address',
+    hostMin:'HostMin',
+    hostMax:'HostMax',
+    country:'Country',
+    continent:'Continent',
+    isp:'ISP',
+    asn:'ASN',
+    domain:'Domain',
+    matchedNetwork:'Matched Network',
+    localInfo:'Local IP Info',
+    unavailable:'N/A',
+    typePrivate:'RFC 1918 private range',
+    typeShared:'RFC 6598 CGNAT/shared range',
+    typePublic:'Globally routable range'
+  },
+  mn:{
+    title:'IP Тооцоолуур',
+    copy:'IP Хуулах',
+    copied:'Хуулагдлаа ✓',
+    copyFailed:'Хуулахад алдаа гарлаа',
+    invalid:'Зөв IPv4 хаяг болон CIDR оруулна уу.',
+    statusReady:'Зөвхөн локал ipinfo.json-оос хайлт хийнэ.',
+    statusNoInfo:'Локал ipinfo.json-оос country/ASN мэдээлэл олдсонгүй.',
+    badgePrivate:'Хувийн Сүлжээ',
+    badgeShared:'Shared Address Space',
+    badgePublic:'Нийтийн Интернэт',
+    addressClass:'Анги',
+    subnetMask:'Дэд Сүлжээний Маск',
+    wildcard:'Wildcard Маск',
+    network:'Сүлжээний Хаяг',
+    broadcast:'Broadcast Хаяг',
+    range:'Ашиглах Хүрээ',
+    hosts:'Ашиглах Хост',
+    hostCapacity:'Хостын Боломж',
+    hostUsage:'Энэ дэд сүлжээнд ашиглаж болох хостын тоо',
+    advancedView:'Нарийвчилсан Харагдац',
+    showAdvanced:'Нарийвчилсан Хэсгийг Харуулах',
+    hideAdvanced:'Нарийвчилсан Хэсгийг Нуух',
+    addressCount:'Нийт Хаяг',
+    category:'Хаягийн Төрөл',
+    binary:'Binary Харагдац',
+    address:'Хаяг',
+    hostMin:'Хамгийн Бага Хост',
+    hostMax:'Хамгийн Их Хост',
+    country:'Улс',
+    continent:'Тив',
+    isp:'ISP',
+    asn:'ASN',
+    domain:'Домэйн',
+    matchedNetwork:'Таарсан Сүлжээ',
+    localInfo:'Локал IP Мэдээлэл',
+    unavailable:'Алга',
+    typePrivate:'RFC 1918 хувийн муж',
+    typeShared:'RFC 6598 CGNAT/shared муж',
+    typePublic:'Нийтэд чиглүүлж болох муж'
+  }
+};
+
+function t(key){return translations[currentLanguage][key]||key}
+
+function toggleTheme(){document.body.classList.toggle('dark');document.body.classList.toggle('light')}
+
+function changeLanguage(lang){
+  currentLanguage=translations[lang]?lang:'mn';
+  document.documentElement.lang=currentLanguage;
+  document.getElementById('title').textContent=t('title');
+  document.getElementById('copyBtn').textContent=t('copy');
+  document.getElementById('langMn').classList.toggle('active',currentLanguage==='mn');
+  document.getElementById('langEn').classList.toggle('active',currentLanguage==='en');
+  showStatus(t('statusReady'));
+  calculate();
+}
+
+function toggleAdvanced(){
+  advancedOpen=!advancedOpen;
+  calculate();
+}
+
+function showStatus(message){
+  document.getElementById('status').textContent=message||'';
+}
+
+function nav(e,el){
+  if(e.key==='ArrowRight'){
+    let nextEl=el.nextElementSibling;
+    while(nextEl&&nextEl.tagName!=='INPUT') nextEl=nextEl.nextElementSibling;
+    if(nextEl) nextEl.focus();
+  }
+  if(e.key==='ArrowLeft'){
+    let prevEl=el.previousElementSibling;
+    while(prevEl&&prevEl.tagName!=='INPUT') prevEl=prevEl.previousElementSibling;
+    if(prevEl) prevEl.focus();
+  }
+}
+
+function next(el){
+  const val=el.value.replace(/[^0-9]/g,'');
+  el.value=val;
+  el.classList.toggle('invalid',val!==''&&Number(val)>255);
+  if(val.length===3&&el.nextElementSibling) el.nextElementSibling.focus();
+  calculate();
+}
+
+function handlePaste(event){
+  const pasted=(event.clipboardData||window.clipboardData)?.getData('text')?.trim();
+  if(!pasted) return;
+
+  const match=pasted.match(/^(\d{1,3}(?:\.\d{1,3}){3})(?:\/(\d{1,2}))?$/);
+  if(!match) return;
+
+  event.preventDefault();
+  setIP(match[1]);
+  if(match[2]) document.getElementById('cidr').value=match[2];
+  calculate();
+}
+
+function getIP(){return ipInputs().map(i=>i.value).join('.')}
+
+function setIP(ip){
+  const parts=(ip||'').split('.');
+  ipInputs().forEach((input,index)=>{
+    input.value=parts[index]||'';
+    input.classList.toggle('invalid',input.value!==''&&Number(input.value)>255);
+  });
+}
+
+function showToast(msg){
+  const tEl=document.getElementById('toast');
+  tEl.textContent=msg||t('copied');
+  tEl.classList.add('show');
+  setTimeout(()=>tEl.classList.remove('show'),1500);
+}
+
+function fallbackCopy(text){
+  const textarea=document.createElement('textarea');
+  textarea.value=text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  try{document.execCommand('copy');showToast(t('copied'));}
+  catch(e){showToast(t('copyFailed'));}
+  document.body.removeChild(textarea);
+}
+
+function copyIP(){
+  const ip=`${getIP()}/${document.getElementById('cidr').value||32}`;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(ip).then(()=>showToast(t('copied'))).catch(()=>fallbackCopy(ip));
+  }else{
+    fallbackCopy(ip);
+  }
+}
+
+function ipToInt(ip){return ip.split('.').reduce((a,o)=>(a<<8)+(+o||0),0)>>>0}
+function intToIp(int){return [24,16,8,0].map(s=>(int>>>s)&255).join('.')}
+function dottedBinary(ip){return ip.split('.').map(o=>(+o).toString(2).padStart(8,'0')).join('.')}
+
+function renderBinary(ip,cidr){
+  const bits=ip.split('.').map(o=>(+o).toString(2).padStart(8,'0')).join('.');
+  const compact=bits.replace(/\./g,'');
+  return `${compact.slice(0,cidr)} ${compact.slice(cidr)}`.trim().replace(/(.{8})(?=.)/g,'$1.');
+}
+
+function isPrivate(ip){
+  const p=ip.split('.').map(Number);
+  return p[0]===10||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===192&&p[1]===168);
+}
+
+function isShared(ip){
+  const p=ip.split('.').map(Number);
+  return p[0]===100&&p[1]>=64&&p[1]<=127;
+}
+
+function getAddressType(ip){
+  if(isPrivate(ip)) return 'private';
+  if(isShared(ip)) return 'shared';
+  return 'public';
+}
+
+function getClass(ip){
+  const f=+ip.split('.')[0];
+  if(f>=1&&f<=126)return'Class A';
+  if(f>=128&&f<=191)return'Class B';
+  if(f>=192&&f<=223)return'Class C';
+  if(f>=224&&f<=239)return'Class D';
+  if(f>=240)return'Class E';
+  return'Unknown';
+}
+
+function parseNetwork(network){
+  const [base,cidrText]=network.split('/');
+  const cidr=Number(cidrText);
+  const start=ipToInt(base);
+  const mask=cidr===0?0:(~0<<(32-cidr))>>>0;
+  const end=(start | (~mask>>>0))>>>0;
+  return {start,end};
+}
+
+function buildBucketLookup(records){
+  const normalized=records.map(record=>({...record,...parseNetwork(record.network)}));
+  return function lookup(ip){
+    const target=ipToInt(ip);
+    let low=0;
+    let high=normalized.length-1;
+    while(low<=high){
+      const mid=Math.floor((low+high)/2);
+      const entry=normalized[mid];
+      if(target<entry.start) high=mid-1;
+      else if(target>entry.end) low=mid+1;
+      else return entry;
+    }
+    return null;
+  };
+}
+
+async function loadIpInfoBucket(firstOctet){
+  const response=await fetch('./ipinfo.json');
+  if(!response.ok||!response.body) throw new Error('Failed to load ipinfo.json');
+
+  const reader=response.body.getReader();
+  const decoder=new TextDecoder();
+  const records=[];
+  let buffer='';
+  let pastTarget=false;
+
+  while(!pastTarget){
+    const {value,done}=await reader.read();
+    if(done) break;
+    buffer+=decoder.decode(value,{stream:true});
+    const lines=buffer.split(/\r?\n/);
+    buffer=lines.pop()||'';
+    for(const line of lines){
+      if(!line.trim()) continue;
+      const record=JSON.parse(line);
+      const recordFirstOctet=Number(record.network.split('.')[0]);
+      if(recordFirstOctet===firstOctet) records.push(record);
+      if(recordFirstOctet>firstOctet){
+        pastTarget=true;
+        break;
+      }
+    }
+  }
+
+  buffer+=decoder.decode();
+  if(!pastTarget&&buffer.trim()){
+    const record=JSON.parse(buffer);
+    if(Number(record.network.split('.')[0])===firstOctet) records.push(record);
+  }
+
+  return buildBucketLookup(records);
+}
+
+async function fetchIPInfo(ip){
+  try{
+    const firstOctet=Number(ip.split('.')[0]);
+    if(!ipInfoBucketCache.has(firstOctet)){
+      ipInfoBucketCache.set(firstOctet,loadIpInfoBucket(firstOctet));
+    }
+    const lookup=await ipInfoBucketCache.get(firstOctet);
+    return lookup(ip);
+  }catch(e){
+    console.error('ipinfo lookup failed',e);
+    return null;
+  }
+}
+
+function getFlag(countryCode){
+  return countryCode?String.fromCodePoint(...[...countryCode.toUpperCase()].map(c=>127397+c.charCodeAt())):'';
+}
+
+function summaryRow(label,value){
+  return `<div><b>${label}:</b> ${value}</div>`;
+}
+
+function binaryRow(label,ip,cidr){
+  return `<div class="binary-row"><div class="binary-label">${label}</div><div class="binary-value">${renderBinary(ip,cidr)}</div></div>`;
+}
+
+async function calculate(){
+  const ip=getIP();
+  const cidr=parseInt(document.getElementById('cidr').value,10);
+  const out=document.getElementById('output');
+
+  if(ip.includes('..')||isNaN(cidr)||cidr<0||cidr>32){
+    out.innerHTML='';
+    showStatus(t('invalid'));
+    return;
+  }
+
+  const octets=ip.split('.').map(Number);
+  if(octets.some(o=>o<0||o>255||Number.isNaN(o))){
+    out.innerHTML='';
+    showStatus(t('invalid'));
+    return;
+  }
+
+  showStatus(t('statusReady'));
+
+  const ipInt=ipToInt(ip);
+  const mask=cidr===0?0:(~0<<(32-cidr))>>>0;
+  const wildcard=(~mask)>>>0;
+  const net=ipInt & mask;
+  const bc=net | wildcard;
+  const totalAddresses=2**(32-cidr);
+  const usableHosts=cidr===32?1:cidr===31?2:Math.max(0,totalAddresses-2);
+  const first=cidr>=31?net:net+1;
+  const last=cidr>=31?bc:bc-1;
+  const addressType=getAddressType(ip);
+  const cls=getClass(ip);
+
+  const badgeLabel=addressType==='private'?t('badgePrivate'):addressType==='shared'?t('badgeShared'):t('badgePublic');
+  const categoryText=addressType==='private'?t('typePrivate'):addressType==='shared'?t('typeShared'):t('typePublic');
+
+  let metaHTML='';
+  const info=await fetchIPInfo(ip);
+  if(info){
+    metaHTML=`
+    <div class="meta">
+      <div style="font-weight:700;margin-bottom:6px">${t('localInfo')}</div>
+      ${summaryRow(t('country'),`${getFlag(info.country_code)} ${info.country||t('unavailable')}`)}
+      ${summaryRow(t('continent'),info.continent||t('unavailable'))}
+      ${summaryRow(t('isp'),info.as_name||t('unavailable'))}
+      ${summaryRow(t('asn'),info.asn||t('unavailable'))}
+      ${summaryRow(t('domain'),info.as_domain||t('unavailable'))}
+      ${summaryRow(t('matchedNetwork'),info.network||t('unavailable'))}
+    </div>`;
+  }else if(addressType==='public'){
+    showStatus(t('statusNoInfo'));
+  }
+
+  const advancedButton=`<button class="advanced-btn" onclick="toggleAdvanced()">${advancedOpen?t('hideAdvanced'):t('showAdvanced')}</button>`;
+  const advancedPanel=advancedOpen?`
+  <div class="binary-panel">
+    <div style="font-weight:700;margin-bottom:8px">${t('advancedView')}</div>
+    ${binaryRow(t('address'),ip,cidr)}
+    ${binaryRow(t('subnetMask'),intToIp(mask),cidr)}
+    ${binaryRow(t('wildcard'),intToIp(wildcard),cidr)}
+    ${binaryRow(t('network'),intToIp(net),cidr)}
+    ${binaryRow(t('hostMin'),intToIp(first),cidr)}
+    ${binaryRow(t('hostMax'),intToIp(last),cidr)}
+    ${binaryRow(t('broadcast'),intToIp(bc),cidr)}
+  </div>
+  `:'';
+
+  out.innerHTML=`
+  <div class="badges">
+    <span class="badge ${addressType}">${badgeLabel}</span>
+  </div>
+
+  <div class="summary-grid">
+    ${summaryRow(t('category'),categoryText)}
+    ${summaryRow(t('addressClass'),cls)}
+    ${summaryRow(t('subnetMask'),intToIp(mask))}
+    ${summaryRow(t('wildcard'),intToIp(wildcard))}
+    ${summaryRow(t('network'),`${intToIp(net)}/${cidr}`)}
+    ${summaryRow(t('broadcast'),intToIp(bc))}
+    ${summaryRow(t('range'),`${intToIp(first)} - ${intToIp(last)}`)}
+    ${summaryRow(t('hosts'),usableHosts)}
+    ${summaryRow(t('addressCount'),totalAddresses)}
+    ${summaryRow(t('hostCapacity'),t('hostUsage'))}
+  </div>
+
+  <div style="margin-top:12px">${advancedButton}</div>
+  ${advancedPanel}
+  ${metaHTML}
+  `;
+}
+
+console.assert(ipToInt('192.168.1.1')===3232235777,'ipToInt failed');
+console.assert(intToIp(3232235777)==='192.168.1.1','intToIp failed');
+console.assert(isPrivate('192.168.1.1')===true,'private detection failed');
+console.assert(isShared('100.64.0.1')===true,'shared range detection failed');
+console.assert(getClass('8.8.8.8')==='Class A','class detection failed');
+
+function init(){
+  ipInputs().forEach(input=>input.addEventListener('paste',handlePaste));
+  setIP('192.168.1.100');
+  document.getElementById('cidr').value=32;
+  changeLanguage('mn');
+}
+
+init();
+</script>
+
+</body>
+</html>
