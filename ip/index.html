@@ -14,12 +14,10 @@ body.dark{background:#0f172a;color:#e5e7eb}
 body.dark .card{background:rgba(30,41,59,.78)}
 
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.toolbar-right{display:flex;align-items:center;gap:10px}
-.lang-picker{display:flex;gap:6px}
-.lang-btn,.advanced-btn{padding:7px 10px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#111;cursor:pointer}
-.lang-btn.active{background:#e0e7ff;border-color:#6366f1}
-body.dark .lang-btn,body.dark .advanced-btn{background:#0f172a;color:#e5e7eb;border-color:#475569}
-body.dark .lang-btn.active{background:#312e81;border-color:#818cf8}
+.toolbar-right{display:flex;align-items:center;gap:12px}
+.lang-toggle{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border:1px solid #cbd5e1;border-radius:12px;background:rgba(255,255,255,.72);cursor:pointer;color:#111}
+.lang-toggle img{width:24px;height:18px;display:block;border-radius:3px}
+body.dark .lang-toggle{background:rgba(15,23,42,.8);border-color:#475569;color:#e5e7eb}
 
 .toggle{display:flex;justify-content:flex-end}
 .switch{width:50px;height:26px;background:#ddd;border-radius:999px;position:relative;cursor:pointer}
@@ -29,36 +27,60 @@ body.dark .switch::after{content:"☾";transform:translateX(24px)}
 
 .ip-row{display:flex;gap:6px;margin-bottom:12px;width:100%;align-items:center}
 .ip-row input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid #cbd5e1;text-align:center}
+.ip-row input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.18)}
 .ip-row input.invalid{border-color:#ef4444;background:#fee2e2}
+body.dark .ip-row input{background:#0f172a;color:#fff;border-color:#475569}
+body.dark .ip-row input:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.22)}
+body.dark .ip-row input.invalid{background:#7f1d1d;color:#fff;border-color:#f87171}
 .slash{font-weight:700}
+body.dark .slash{color:#fff}
 
-.actions{display:flex;gap:8px;margin-top:10px}
-.copy-btn{flex:1;padding:9px;border:none;border-radius:8px;background:#4f46e5;color:white;cursor:pointer;font-size:13px}
+.ip-action{width:42px;height:42px;border:none;border-radius:10px;background:#4f46e5;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 42px}
+.ip-action img{width:18px;height:18px;display:block}
+.ip-action:disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed}
+body.dark .ip-action{background:#6366f1;color:#fff}
+body.dark .ip-action:disabled{background:#334155;color:#e2e8f0}
+.actions{margin-top:12px}
+.info-btn{width:100%;padding:10px 14px;border:none;border-radius:10px;background:#4f46e5;color:#fff;cursor:pointer;font-size:14px;font-weight:600}
+.info-btn:disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed}
+body.dark .info-btn{background:#6366f1;color:#fff}
+body.dark .info-btn:disabled{background:#334155;color:#e2e8f0}
 
 .result{margin-top:14px;font-size:13px;line-height:1.65}
+body.dark .result{color:#fff}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
-.private{background:#22c55e22;color:#15803d}
+.private{background:#2563eb22;color:#1d4ed8}
 .shared{background:#f59e0b22;color:#b45309}
-.public{background:#6366f122;color:#4338ca}
+.public{background:#16a34a22;color:#15803d}
+body.dark .badge{color:#fff}
+body.dark .private{background:#2563ebaa}
+body.dark .shared{background:#d97706cc}
+body.dark .public{background:#16a34acc}
 
 .summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px}
 .summary-grid div{min-width:0}
-.binary-panel{margin-top:14px;padding-top:10px;border-top:1px dashed #cbd5e1}
+.advanced-toggle{margin-top:14px;color:#4f46e5;font-size:13px;font-weight:600;cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:8px}
+.advanced-toggle::before{content:"›";font-size:18px;line-height:1;transform:rotate(90deg);transition:.2s}
+.advanced-toggle.collapsed::before{transform:rotate(0deg)}
+.advanced-panel{margin-top:10px;padding:14px 0 0;border-top:1px dashed #cbd5e1;animation:fadeIn .2s ease}
+body.dark .advanced-toggle{color:#c4b5fd}
+body.dark .advanced-panel{border-top-color:#475569}
 .binary-row{display:grid;grid-template-columns:110px 1fr;gap:10px;font-family:Consolas,"Courier New",monospace;font-size:12px;align-items:start}
 .binary-row + .binary-row{margin-top:6px}
 .binary-label{font-weight:700}
 .binary-value{word-break:break-all}
-.meta{margin-top:12px;padding-top:10px;border-top:1px dashed #cbd5e1;font-size:12px}
-.flag{font-size:18px;margin-right:6px}
 .status{margin-top:8px;font-size:12px;color:#64748b}
 body.dark .status{color:#94a3b8}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.3s}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
 @media (max-width:640px){
   .card{padding:16px}
-  .toolbar,.toolbar-right,.actions{flex-direction:column;align-items:stretch}
+  .toolbar,.toolbar-right{flex-direction:column;align-items:stretch}
   .summary-grid{grid-template-columns:1fr}
   .binary-row{grid-template-columns:1fr}
 }
@@ -70,47 +92,48 @@ body.dark .status{color:#94a3b8}
   <div class="toolbar">
     <h3 id="title" style="margin:0">IP Calculator</h3>
     <div class="toolbar-right">
-      <div class="lang-picker">
-        <button id="langMn" class="lang-btn" onclick="changeLanguage('mn')">🇲🇳</button>
-        <button id="langEn" class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button>
-      </div>
+      <button id="langToggle" class="lang-toggle" onclick="toggleLanguage()">
+        <img id="langFlag" src="./flag-mn.svg" alt="Language flag">
+      </button>
       <div class="toggle"><div class="switch" onclick="toggleTheme()"></div></div>
     </div>
   </div>
 
   <div class="ip-row">
-    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
     <span class="slash">/</span>
-    <input id="cidr" maxlength="2" style="width:56px;text-align:center" placeholder="32" oninput="calculate()" onkeydown="nav(event,this)">
+    <input id="cidr" maxlength="2" style="width:56px;text-align:center" placeholder="32" onfocus="selectField(this)" onclick="selectField(this)" oninput="handleCidrInput(this)" onkeydown="nav(event,this)">
+    <button id="copyIconBtn" class="ip-action" type="button" onclick="copyIpValue()" title="Copy IP" aria-label="Copy IP">
+      <img src="./copy.svg" alt="" aria-hidden="true">
+    </button>
   </div>
 
   <div id="output" class="result"></div>
   <div class="actions">
-    <button id="copyBtn" class="copy-btn" onclick="copyIP()">Copy IP</button>
+    <button id="ipActionBtn" class="info-btn" type="button" onclick="handleIpAction()" disabled>IPInfo</button>
   </div>
   <div id="status" class="status"></div>
 </div>
 
-<div id="toast" class="toast">Copied ✓</div>
-
 <script>
 const ipInputs=()=>Array.from(document.querySelectorAll('.ip-part'));
-const ipInfoBucketCache=new Map();
 let currentLanguage='mn';
 let advancedOpen=false;
 
 const translations={
   en:{
     title:'IP Calculator',
-    copy:'Copy IP',
+    invalid:'Enter a valid IPv4 address and CIDR.',
+    langLabel:'English',
+    infoTitle:'Open IP info',
+    infoDisabled:'IP info is available only for public addresses.',
+    infoButton:'Open In ipinfo.io',
+    copyTitle:'Copy IP/CIDR',
     copied:'Copied ✓',
     copyFailed:'Copy failed',
-    invalid:'Enter a valid IPv4 address and CIDR.',
-    statusReady:'Local lookup uses ipinfo.json only.',
-    statusNoInfo:'No country/ASN match found in local ipinfo.json.',
     badgePrivate:'Private Internet',
     badgeShared:'Shared Address Space',
     badgePublic:'Public Internet',
@@ -121,37 +144,28 @@ const translations={
     broadcast:'Broadcast',
     range:'Usable Range',
     hosts:'Usable Hosts',
-    hostCapacity:'Host Capacity',
-    hostUsage:'Usable host addresses in this subnet',
     advancedView:'Advanced View',
-    showAdvanced:'Show Advanced View',
-    hideAdvanced:'Hide Advanced View',
+    showAdvanced:'Show advanced details',
+    hideAdvanced:'Hide advanced details',
     addressCount:'Total Addresses',
     category:'Address Type',
-    binary:'Binary View',
     address:'Address',
     hostMin:'HostMin',
     hostMax:'HostMax',
-    country:'Country',
-    continent:'Continent',
-    isp:'ISP',
-    asn:'ASN',
-    domain:'Domain',
-    matchedNetwork:'Matched Network',
-    localInfo:'Local IP Info',
-    unavailable:'N/A',
     typePrivate:'RFC 1918 private range',
     typeShared:'RFC 6598 CGNAT/shared range',
     typePublic:'Globally routable range'
   },
   mn:{
     title:'IP Тооцоолуур',
-    copy:'IP Хуулах',
+    invalid:'Зөв IPv4 хаяг болон CIDR оруулна уу.',
+    langLabel:'Монгол',
+    infoTitle:'IP мэдээлэл нээх',
+    infoDisabled:'IP мэдээлэл зөвхөн public хаяг дээр идэвхтэй.',
+    infoButton:'ipinfo.io дээр нээх',
+    copyTitle:'IP/CIDR хуулах',
     copied:'Хуулагдлаа ✓',
     copyFailed:'Хуулахад алдаа гарлаа',
-    invalid:'Зөв IPv4 хаяг болон CIDR оруулна уу.',
-    statusReady:'Зөвхөн локал ipinfo.json-оос хайлт хийнэ.',
-    statusNoInfo:'Локал ipinfo.json-оос country/ASN мэдээлэл олдсонгүй.',
     badgePrivate:'Хувийн Сүлжээ',
     badgeShared:'Shared Address Space',
     badgePublic:'Нийтийн Интернэт',
@@ -162,25 +176,14 @@ const translations={
     broadcast:'Broadcast Хаяг',
     range:'Ашиглах Хүрээ',
     hosts:'Ашиглах Хост',
-    hostCapacity:'Хостын Боломж',
-    hostUsage:'Энэ дэд сүлжээнд ашиглаж болох хостын тоо',
     advancedView:'Нарийвчилсан Харагдац',
-    showAdvanced:'Нарийвчилсан Хэсгийг Харуулах',
-    hideAdvanced:'Нарийвчилсан Хэсгийг Нуух',
+    showAdvanced:'Нарийвчилсан мэдээлэл харах',
+    hideAdvanced:'Нарийвчилсан мэдээлэл нуух',
     addressCount:'Нийт Хаяг',
     category:'Хаягийн Төрөл',
-    binary:'Binary Харагдац',
     address:'Хаяг',
     hostMin:'Хамгийн Бага Хост',
     hostMax:'Хамгийн Их Хост',
-    country:'Улс',
-    continent:'Тив',
-    isp:'ISP',
-    asn:'ASN',
-    domain:'Домэйн',
-    matchedNetwork:'Таарсан Сүлжээ',
-    localInfo:'Локал IP Мэдээлэл',
-    unavailable:'Алга',
     typePrivate:'RFC 1918 хувийн муж',
     typeShared:'RFC 6598 CGNAT/shared муж',
     typePublic:'Нийтэд чиглүүлж болох муж'
@@ -195,16 +198,27 @@ function changeLanguage(lang){
   currentLanguage=translations[lang]?lang:'mn';
   document.documentElement.lang=currentLanguage;
   document.getElementById('title').textContent=t('title');
-  document.getElementById('copyBtn').textContent=t('copy');
-  document.getElementById('langMn').classList.toggle('active',currentLanguage==='mn');
-  document.getElementById('langEn').classList.toggle('active',currentLanguage==='en');
-  showStatus(t('statusReady'));
+  document.getElementById('langFlag').src=currentLanguage==='mn'?'./flag-mn.svg':'./flag-us.svg';
+  document.getElementById('langFlag').alt=currentLanguage==='mn'?'Mongolia flag':'USA flag';
+  document.getElementById('langToggle').title=t('langLabel');
+  document.getElementById('copyIconBtn').title=t('copyTitle');
+  document.getElementById('copyIconBtn').setAttribute('aria-label',t('copyTitle'));
+  document.getElementById('ipActionBtn').textContent=t('infoButton');
+  showStatus('');
   calculate();
+}
+
+function toggleLanguage(){
+  changeLanguage(currentLanguage==='mn'?'en':'mn');
 }
 
 function toggleAdvanced(){
   advancedOpen=!advancedOpen;
   calculate();
+}
+
+function selectField(el){
+  requestAnimationFrame(()=>el.select());
 }
 
 function showStatus(message){
@@ -232,6 +246,13 @@ function next(el){
   calculate();
 }
 
+function handleCidrInput(el){
+  const val=el.value.replace(/[^0-9]/g,'').slice(0,2);
+  el.value=val;
+  el.classList.toggle('invalid',val!==''&&(Number(val)<0||Number(val)>32));
+  calculate();
+}
+
 function handlePaste(event){
   const pasted=(event.clipboardData||window.clipboardData)?.getData('text')?.trim();
   if(!pasted) return;
@@ -255,35 +276,33 @@ function setIP(ip){
   });
 }
 
-function showToast(msg){
-  const tEl=document.getElementById('toast');
-  tEl.textContent=msg||t('copied');
-  tEl.classList.add('show');
-  setTimeout(()=>tEl.classList.remove('show'),1500);
+function showTempStatus(message){
+  showStatus(message);
+  clearTimeout(showTempStatus.timer);
+  showTempStatus.timer=setTimeout(()=>showStatus(''),1500);
 }
 
-function fallbackCopy(text){
-  const textarea=document.createElement('textarea');
-  textarea.value=text;
-  document.body.appendChild(textarea);
-  textarea.select();
-  try{document.execCommand('copy');showToast(t('copied'));}
-  catch(e){showToast(t('copyFailed'));}
-  document.body.removeChild(textarea);
-}
-
-function copyIP(){
-  const ip=`${getIP()}/${document.getElementById('cidr').value||32}`;
-  if(navigator.clipboard&&window.isSecureContext){
-    navigator.clipboard.writeText(ip).then(()=>showToast(t('copied'))).catch(()=>fallbackCopy(ip));
-  }else{
-    fallbackCopy(ip);
+async function copyIpValue(){
+  const value=`${getIP()}/${document.getElementById('cidr').value||32}`;
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      await navigator.clipboard.writeText(value);
+    }else{
+      const textarea=document.createElement('textarea');
+      textarea.value=value;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    showTempStatus(t('copied'));
+  }catch(e){
+    showTempStatus(t('copyFailed'));
   }
 }
 
 function ipToInt(ip){return ip.split('.').reduce((a,o)=>(a<<8)+(+o||0),0)>>>0}
 function intToIp(int){return [24,16,8,0].map(s=>(int>>>s)&255).join('.')}
-function dottedBinary(ip){return ip.split('.').map(o=>(+o).toString(2).padStart(8,'0')).join('.')}
 
 function renderBinary(ip,cidr){
   const bits=ip.split('.').map(o=>(+o).toString(2).padStart(8,'0')).join('.');
@@ -326,80 +345,25 @@ function parseNetwork(network){
   return {start,end};
 }
 
-function buildBucketLookup(records){
-  const normalized=records.map(record=>({...record,...parseNetwork(record.network)}));
-  return function lookup(ip){
-    const target=ipToInt(ip);
-    let low=0;
-    let high=normalized.length-1;
-    while(low<=high){
-      const mid=Math.floor((low+high)/2);
-      const entry=normalized[mid];
-      if(target<entry.start) high=mid-1;
-      else if(target>entry.end) low=mid+1;
-      else return entry;
-    }
-    return null;
-  };
-}
-
-async function loadIpInfoBucket(firstOctet){
-  const response=await fetch('./ipinfo.json');
-  if(!response.ok||!response.body) throw new Error('Failed to load ipinfo.json');
-
-  const reader=response.body.getReader();
-  const decoder=new TextDecoder();
-  const records=[];
-  let buffer='';
-  let pastTarget=false;
-
-  while(!pastTarget){
-    const {value,done}=await reader.read();
-    if(done) break;
-    buffer+=decoder.decode(value,{stream:true});
-    const lines=buffer.split(/\r?\n/);
-    buffer=lines.pop()||'';
-    for(const line of lines){
-      if(!line.trim()) continue;
-      const record=JSON.parse(line);
-      const recordFirstOctet=Number(record.network.split('.')[0]);
-      if(recordFirstOctet===firstOctet) records.push(record);
-      if(recordFirstOctet>firstOctet){
-        pastTarget=true;
-        break;
-      }
-    }
-  }
-
-  buffer+=decoder.decode();
-  if(!pastTarget&&buffer.trim()){
-    const record=JSON.parse(buffer);
-    if(Number(record.network.split('.')[0])===firstOctet) records.push(record);
-  }
-
-  return buildBucketLookup(records);
-}
-
-async function fetchIPInfo(ip){
-  try{
-    const firstOctet=Number(ip.split('.')[0]);
-    if(!ipInfoBucketCache.has(firstOctet)){
-      ipInfoBucketCache.set(firstOctet,loadIpInfoBucket(firstOctet));
-    }
-    const lookup=await ipInfoBucketCache.get(firstOctet);
-    return lookup(ip);
-  }catch(e){
-    console.error('ipinfo lookup failed',e);
-    return null;
-  }
-}
-
-function getFlag(countryCode){
-  return countryCode?String.fromCodePoint(...[...countryCode.toUpperCase()].map(c=>127397+c.charCodeAt())):'';
-}
-
 function summaryRow(label,value){
   return `<div><b>${label}:</b> ${value}</div>`;
+}
+
+function updateIpAction(addressType,ip){
+  const button=document.getElementById('ipActionBtn');
+  const disabled=addressType!=='public';
+  button.disabled=disabled;
+  button.title=disabled?t('infoDisabled'):t('infoTitle');
+  button.setAttribute('aria-label',button.title);
+  button.dataset.ip=ip;
+  button.textContent=t('infoButton');
+}
+
+function handleIpAction(){
+  const button=document.getElementById('ipActionBtn');
+  if(button.disabled) return;
+  const ip=button.dataset.ip;
+  if(ip) window.open(`https://ipinfo.io/${ip}`,'_blank','noopener');
 }
 
 function binaryRow(label,ip,cidr){
@@ -412,10 +376,12 @@ async function calculate(){
   const out=document.getElementById('output');
 
   if(ip.includes('..')||isNaN(cidr)||cidr<0||cidr>32){
+    document.getElementById('cidr').classList.add('invalid');
     out.innerHTML='';
     showStatus(t('invalid'));
     return;
   }
+  document.getElementById('cidr').classList.remove('invalid');
 
   const octets=ip.split('.').map(Number);
   if(octets.some(o=>o<0||o>255||Number.isNaN(o))){
@@ -424,7 +390,7 @@ async function calculate(){
     return;
   }
 
-  showStatus(t('statusReady'));
+  showStatus('');
 
   const ipInt=ipToInt(ip);
   const mask=cidr===0?0:(~0<<(32-cidr))>>>0;
@@ -440,27 +406,11 @@ async function calculate(){
 
   const badgeLabel=addressType==='private'?t('badgePrivate'):addressType==='shared'?t('badgeShared'):t('badgePublic');
   const categoryText=addressType==='private'?t('typePrivate'):addressType==='shared'?t('typeShared'):t('typePublic');
+  updateIpAction(addressType,ip);
 
-  let metaHTML='';
-  const info=await fetchIPInfo(ip);
-  if(info){
-    metaHTML=`
-    <div class="meta">
-      <div style="font-weight:700;margin-bottom:6px">${t('localInfo')}</div>
-      ${summaryRow(t('country'),`${getFlag(info.country_code)} ${info.country||t('unavailable')}`)}
-      ${summaryRow(t('continent'),info.continent||t('unavailable'))}
-      ${summaryRow(t('isp'),info.as_name||t('unavailable'))}
-      ${summaryRow(t('asn'),info.asn||t('unavailable'))}
-      ${summaryRow(t('domain'),info.as_domain||t('unavailable'))}
-      ${summaryRow(t('matchedNetwork'),info.network||t('unavailable'))}
-    </div>`;
-  }else if(addressType==='public'){
-    showStatus(t('statusNoInfo'));
-  }
-
-  const advancedButton=`<button class="advanced-btn" onclick="toggleAdvanced()">${advancedOpen?t('hideAdvanced'):t('showAdvanced')}</button>`;
+  const advancedButton=`<div class="advanced-toggle ${advancedOpen?'':'collapsed'}" onclick="toggleAdvanced()">${advancedOpen?t('hideAdvanced'):t('showAdvanced')}</div>`;
   const advancedPanel=advancedOpen?`
-  <div class="binary-panel">
+  <div class="advanced-panel">
     <div style="font-weight:700;margin-bottom:8px">${t('advancedView')}</div>
     ${binaryRow(t('address'),ip,cidr)}
     ${binaryRow(t('subnetMask'),intToIp(mask),cidr)}
@@ -487,12 +437,10 @@ async function calculate(){
     ${summaryRow(t('range'),`${intToIp(first)} - ${intToIp(last)}`)}
     ${summaryRow(t('hosts'),usableHosts)}
     ${summaryRow(t('addressCount'),totalAddresses)}
-    ${summaryRow(t('hostCapacity'),t('hostUsage'))}
   </div>
 
-  <div style="margin-top:12px">${advancedButton}</div>
+  ${advancedButton}
   ${advancedPanel}
-  ${metaHTML}
   `;
 }
 
