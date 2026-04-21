@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IP Calculator</title>
+<link rel="icon" type="image/svg+xml" href="./ip-icon.svg">
 <style>
 *{box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;transition:.3s}
+body{font-family:"SN Pro","Helvetica Neue",Helvetica,"Nimbus Sans","Arial Nova",Arial,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;transition:.3s;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
 body.light{background:linear-gradient(135deg,#eef2ff,#f8fafc);color:#111}
 body.dark{background:#0f172a;color:#e5e7eb}
 
@@ -15,9 +16,10 @@ body.dark .card{background:rgba(30,41,59,.78)}
 
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
 .toolbar-right{display:flex;align-items:center;gap:12px}
-.lang-toggle{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border:1px solid #cbd5e1;border-radius:12px;background:rgba(255,255,255,.72);cursor:pointer;color:#111}
-.lang-toggle img{width:24px;height:18px;display:block;border-radius:3px}
-body.dark .lang-toggle{background:rgba(15,23,42,.8);border-color:#475569;color:#e5e7eb}
+.site-logo{height:48px;width:min(240px,58vw);display:block}
+.lang-toggle{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border:none;border-radius:12px;background:transparent;cursor:pointer;color:#111}
+.lang-toggle img{width:24px;height:18px;display:block;border-radius:4px;overflow:hidden}
+body.dark .lang-toggle{background:transparent;color:#e5e7eb}
 
 .toggle{display:flex;justify-content:flex-end}
 .switch{width:50px;height:26px;background:#ddd;border-radius:999px;position:relative;cursor:pointer}
@@ -27,6 +29,7 @@ body.dark .switch::after{content:"☾";transform:translateX(24px)}
 
 .ip-row{display:flex;gap:6px;margin-bottom:12px;width:100%;align-items:center}
 .ip-row input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid #cbd5e1;text-align:center}
+.ip-row input::selection{background:#c7d2fe;color:#111827}
 .ip-row input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.18)}
 .ip-row input.invalid{border-color:#ef4444;background:#fee2e2}
 body.dark .ip-row input{background:#0f172a;color:#fff;border-color:#475569}
@@ -53,10 +56,14 @@ body.dark .result{color:#fff}
 .private{background:#2563eb22;color:#1d4ed8}
 .shared{background:#f59e0b22;color:#b45309}
 .public{background:#16a34a22;color:#15803d}
+.linklocal{background:#06b6d422;color:#0e7490}
+.reserved{background:#64748b22;color:#475569}
 body.dark .badge{color:#fff}
 body.dark .private{background:#2563ebaa}
 body.dark .shared{background:#d97706cc}
 body.dark .public{background:#16a34acc}
+body.dark .linklocal{background:#0891b2cc}
+body.dark .reserved{background:#64748bcc}
 
 .summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px}
 .summary-grid div{min-width:0}
@@ -66,12 +73,15 @@ body.dark .public{background:#16a34acc}
 .advanced-panel{margin-top:10px;padding:14px 0 0;border-top:1px dashed #cbd5e1;animation:fadeIn .2s ease}
 body.dark .advanced-toggle{color:#c4b5fd}
 body.dark .advanced-panel{border-top-color:#475569}
-.binary-row{display:grid;grid-template-columns:110px 1fr;gap:10px;font-family:Consolas,"Courier New",monospace;font-size:12px;align-items:start}
+.binary-row{display:grid;grid-template-columns:minmax(180px,max-content) minmax(0,1fr);gap:12px;font-family:"Iosevka Charon Mono",Iosevka,Consolas,"Courier New",monospace;font-size:12px;align-items:start}
 .binary-row + .binary-row{margin-top:6px}
-.binary-label{font-weight:700}
+.binary-label{font-weight:700;white-space:nowrap}
 .binary-value{word-break:break-all}
 .status{margin-top:8px;font-size:12px;color:#64748b}
 body.dark .status{color:#94a3b8}
+.toast{position:fixed;right:20px;bottom:20px;z-index:50;min-width:180px;max-width:280px;padding:12px 14px;border-radius:12px;background:#0f172a;color:#fff;box-shadow:0 18px 45px rgba(15,23,42,.24);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .2s ease,transform .2s ease}
+.toast.show{opacity:1;transform:translateY(0)}
+body.dark .toast{background:#f8fafc;color:#0f172a}
 
 @keyframes fadeIn{
   from{opacity:0;transform:translateY(-4px)}
@@ -80,9 +90,22 @@ body.dark .status{color:#94a3b8}
 
 @media (max-width:640px){
   .card{padding:16px}
-  .toolbar,.toolbar-right{flex-direction:column;align-items:stretch}
+  .toolbar{align-items:center}
+  .toolbar-right{flex-direction:row;align-items:center;justify-content:flex-end}
+  .site-logo{height:42px;width:min(190px,52vw)}
   .summary-grid{grid-template-columns:1fr}
-  .binary-row{grid-template-columns:1fr}
+  .binary-row{grid-template-columns:minmax(160px,max-content) minmax(0,1fr)}
+}
+
+@media (max-width:420px){
+  body{padding:12px}
+  .card{padding:14px}
+  .ip-row{gap:4px}
+  .ip-row input{padding:9px 4px;font-size:13px}
+  .ip-part{flex:1 1 0;max-width:44px}
+  #cidr{width:42px!important;flex:0 0 42px}
+  .ip-action{width:38px;height:38px;flex-basis:38px}
+  .slash{font-size:13px}
 }
 </style>
 </head>
@@ -90,7 +113,7 @@ body.dark .status{color:#94a3b8}
 
 <div class="card">
   <div class="toolbar">
-    <h3 id="title" style="margin:0">IP Calculator</h3>
+    <img class="site-logo" src="./ip-logo.svg" alt="IP Calculator">
     <div class="toolbar-right">
       <button id="langToggle" class="lang-toggle" onclick="toggleLanguage()">
         <img id="langFlag" src="./flag-mn.svg" alt="Language flag">
@@ -100,12 +123,12 @@ body.dark .status{color:#94a3b8}
   </div>
 
   <div class="ip-row">
-    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
-    <input class="ip-part" maxlength="3" onfocus="selectField(this)" onclick="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onmousedown="prepareFieldSelect(event,this)" onfocus="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onmousedown="prepareFieldSelect(event,this)" onfocus="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onmousedown="prepareFieldSelect(event,this)" onfocus="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
+    <input class="ip-part" maxlength="3" onmousedown="prepareFieldSelect(event,this)" onfocus="selectField(this)" oninput="next(this)" onkeydown="nav(event,this)">
     <span class="slash">/</span>
-    <input id="cidr" maxlength="2" style="width:56px;text-align:center" placeholder="32" onfocus="selectField(this)" onclick="selectField(this)" oninput="handleCidrInput(this)" onkeydown="nav(event,this)">
+    <input id="cidr" maxlength="2" style="width:56px;text-align:center" placeholder="32" onmousedown="prepareFieldSelect(event,this)" onfocus="selectField(this)" oninput="handleCidrInput(this)" onkeydown="nav(event,this)">
     <button id="copyIconBtn" class="ip-action" type="button" onclick="copyIpValue()" title="Copy IP" aria-label="Copy IP">
       <img src="./copy.svg" alt="" aria-hidden="true">
     </button>
@@ -117,6 +140,8 @@ body.dark .status{color:#94a3b8}
   </div>
   <div id="status" class="status"></div>
 </div>
+
+<div id="toast" class="toast"></div>
 
 <script>
 const ipInputs=()=>Array.from(document.querySelectorAll('.ip-part'));
@@ -131,12 +156,14 @@ const translations={
     infoTitle:'Open IP info',
     infoDisabled:'IP info is available only for public addresses.',
     infoButton:'Open In ipinfo.io',
-    copyTitle:'Copy IP/CIDR',
+    copyTitle:'Copy IP',
     copied:'Copied ✓',
     copyFailed:'Copy failed',
     badgePrivate:'Private Internet',
     badgeShared:'Shared Address Space',
     badgePublic:'Public Internet',
+    badgeLinkLocal:'Link-local',
+    badgeReserved:'Reserved / Special',
     addressClass:'Class',
     subnetMask:'Subnet Mask',
     wildcard:'Wildcard Mask',
@@ -144,7 +171,7 @@ const translations={
     broadcast:'Broadcast',
     range:'Usable Range',
     hosts:'Usable Hosts',
-    advancedView:'Advanced View',
+    advancedView:'Binary View',
     showAdvanced:'Show advanced details',
     hideAdvanced:'Hide advanced details',
     addressCount:'Total Addresses',
@@ -154,6 +181,8 @@ const translations={
     hostMax:'HostMax',
     typePrivate:'RFC 1918 private range',
     typeShared:'RFC 6598 CGNAT/shared range',
+    typeLinkLocal:'RFC 3927 link-local range',
+    typeReserved:'Reserved or special-use range',
     typePublic:'Globally routable range'
   },
   mn:{
@@ -163,29 +192,33 @@ const translations={
     infoTitle:'IP мэдээлэл нээх',
     infoDisabled:'IP мэдээлэл зөвхөн public хаяг дээр идэвхтэй.',
     infoButton:'ipinfo.io дээр нээх',
-    copyTitle:'IP/CIDR хуулах',
-    copied:'Хуулагдлаа ✓',
+    copyTitle:'IP хуулах',
+    copied:'Хуулагдлаа',
     copyFailed:'Хуулахад алдаа гарлаа',
     badgePrivate:'Хувийн Сүлжээ',
     badgeShared:'Shared Address Space',
     badgePublic:'Нийтийн Интернэт',
-    addressClass:'Анги',
+    badgeLinkLocal:'Link-local',
+    badgeReserved:'Тусгай / Нөөцлөгдсөн',
+    addressClass:'Класс',
     subnetMask:'Дэд Сүлжээний Маск',
     wildcard:'Wildcard Маск',
     network:'Сүлжээний Хаяг',
     broadcast:'Broadcast Хаяг',
     range:'Ашиглах Хүрээ',
     hosts:'Ашиглах Хост',
-    advancedView:'Нарийвчилсан Харагдац',
-    showAdvanced:'Нарийвчилсан мэдээлэл харах',
-    hideAdvanced:'Нарийвчилсан мэдээлэл нуух',
+    advancedView:'Бинари Харагдац',
+    showAdvanced:'Бинари мэдээлэл харах',
+    hideAdvanced:'Бинари мэдээлэл нуух',
     addressCount:'Нийт Хаяг',
     category:'Хаягийн Төрөл',
     address:'Хаяг',
     hostMin:'Хамгийн Бага Хост',
     hostMax:'Хамгийн Их Хост',
-    typePrivate:'RFC 1918 хувийн муж',
-    typeShared:'RFC 6598 CGNAT/shared муж',
+    typePrivate:'RFC 1918 Хувийн муж',
+    typeShared:'RFC 6598 CGNAT/Shared муж',
+    typeLinkLocal:'RFC 3927 Link-local муж',
+    typeReserved:'Тусгай хэрэглээ эсвэл нөөцлөгдсөн муж',
     typePublic:'Нийтэд чиглүүлж болох муж'
   }
 };
@@ -197,7 +230,6 @@ function toggleTheme(){document.body.classList.toggle('dark');document.body.clas
 function changeLanguage(lang){
   currentLanguage=translations[lang]?lang:'mn';
   document.documentElement.lang=currentLanguage;
-  document.getElementById('title').textContent=t('title');
   document.getElementById('langFlag').src=currentLanguage==='mn'?'./flag-mn.svg':'./flag-us.svg';
   document.getElementById('langFlag').alt=currentLanguage==='mn'?'Mongolia flag':'USA flag';
   document.getElementById('langToggle').title=t('langLabel');
@@ -215,6 +247,13 @@ function toggleLanguage(){
 function toggleAdvanced(){
   advancedOpen=!advancedOpen;
   calculate();
+}
+
+function prepareFieldSelect(event,el){
+  if(event.button!==0) return;
+  event.preventDefault();
+  el.focus();
+  selectField(el);
 }
 
 function selectField(el){
@@ -277,13 +316,15 @@ function setIP(ip){
 }
 
 function showTempStatus(message){
-  showStatus(message);
+  const toast=document.getElementById('toast');
+  toast.textContent=message;
+  toast.classList.add('show');
   clearTimeout(showTempStatus.timer);
-  showTempStatus.timer=setTimeout(()=>showStatus(''),1500);
+  showTempStatus.timer=setTimeout(()=>toast.classList.remove('show'),3000);
 }
 
 async function copyIpValue(){
-  const value=`${getIP()}/${document.getElementById('cidr').value||32}`;
+  const value=getIP();
   try{
     if(navigator.clipboard&&window.isSecureContext){
       await navigator.clipboard.writeText(value);
@@ -320,19 +361,33 @@ function isShared(ip){
   return p[0]===100&&p[1]>=64&&p[1]<=127;
 }
 
+function isLinkLocal(ip){
+  const p=ip.split('.').map(Number);
+  return p[0]===169&&p[1]===254;
+}
+
+function isReserved(ip){
+  const p=ip.split('.').map(Number);
+  return p[0]===0||p[0]===127||p[0]>=224;
+}
+
 function getAddressType(ip){
   if(isPrivate(ip)) return 'private';
   if(isShared(ip)) return 'shared';
+  if(isLinkLocal(ip)) return 'linklocal';
+  if(isReserved(ip)) return 'reserved';
   return 'public';
 }
 
 function getClass(ip){
   const f=+ip.split('.')[0];
+  if(f===0)return'Class A (Reserved)';
   if(f>=1&&f<=126)return'Class A';
+  if(f===127)return'Class A (Loopback)';
   if(f>=128&&f<=191)return'Class B';
   if(f>=192&&f<=223)return'Class C';
-  if(f>=224&&f<=239)return'Class D';
-  if(f>=240)return'Class E';
+  if(f>=224&&f<=239)return'Class D (Multicast)';
+  if(f>=240&&f<=255)return'Class E (Reserved)';
   return'Unknown';
 }
 
@@ -404,21 +459,42 @@ async function calculate(){
   const addressType=getAddressType(ip);
   const cls=getClass(ip);
 
-  const badgeLabel=addressType==='private'?t('badgePrivate'):addressType==='shared'?t('badgeShared'):t('badgePublic');
-  const categoryText=addressType==='private'?t('typePrivate'):addressType==='shared'?t('typeShared'):t('typePublic');
+  const addressLabels={
+    private:[t('badgePrivate'),t('typePrivate')],
+    shared:[t('badgeShared'),t('typeShared')],
+    linklocal:[t('badgeLinkLocal'),t('typeLinkLocal')],
+    reserved:[t('badgeReserved'),t('typeReserved')],
+    public:[t('badgePublic'),t('typePublic')]
+  };
+  const [badgeLabel,categoryText]=addressLabels[addressType]||addressLabels.public;
   updateIpAction(addressType,ip);
+
+  const summaryRows=[
+    [t('category'),categoryText],
+    [t('addressClass'),cls],
+    [t('subnetMask'),intToIp(mask)],
+    [t('wildcard'),intToIp(wildcard)],
+    [t('network'),`${intToIp(net)}/${cidr}`],
+    [t('broadcast'),intToIp(bc)],
+    [t('range'),`${intToIp(first)} - ${intToIp(last)}`],
+    [t('hosts'),usableHosts],
+    [t('addressCount'),totalAddresses]
+  ];
+  const binaryRows=[
+    [t('address'),ip],
+    [t('subnetMask'),intToIp(mask)],
+    [t('wildcard'),intToIp(wildcard)],
+    [t('network'),intToIp(net)],
+    [t('hostMin'),intToIp(first)],
+    [t('hostMax'),intToIp(last)],
+    [t('broadcast'),intToIp(bc)]
+  ];
 
   const advancedButton=`<div class="advanced-toggle ${advancedOpen?'':'collapsed'}" onclick="toggleAdvanced()">${advancedOpen?t('hideAdvanced'):t('showAdvanced')}</div>`;
   const advancedPanel=advancedOpen?`
   <div class="advanced-panel">
     <div style="font-weight:700;margin-bottom:8px">${t('advancedView')}</div>
-    ${binaryRow(t('address'),ip,cidr)}
-    ${binaryRow(t('subnetMask'),intToIp(mask),cidr)}
-    ${binaryRow(t('wildcard'),intToIp(wildcard),cidr)}
-    ${binaryRow(t('network'),intToIp(net),cidr)}
-    ${binaryRow(t('hostMin'),intToIp(first),cidr)}
-    ${binaryRow(t('hostMax'),intToIp(last),cidr)}
-    ${binaryRow(t('broadcast'),intToIp(bc),cidr)}
+    ${binaryRows.map(([label,value])=>binaryRow(label,value,cidr)).join('')}
   </div>
   `:'';
 
@@ -428,15 +504,7 @@ async function calculate(){
   </div>
 
   <div class="summary-grid">
-    ${summaryRow(t('category'),categoryText)}
-    ${summaryRow(t('addressClass'),cls)}
-    ${summaryRow(t('subnetMask'),intToIp(mask))}
-    ${summaryRow(t('wildcard'),intToIp(wildcard))}
-    ${summaryRow(t('network'),`${intToIp(net)}/${cidr}`)}
-    ${summaryRow(t('broadcast'),intToIp(bc))}
-    ${summaryRow(t('range'),`${intToIp(first)} - ${intToIp(last)}`)}
-    ${summaryRow(t('hosts'),usableHosts)}
-    ${summaryRow(t('addressCount'),totalAddresses)}
+    ${summaryRows.map(([label,value])=>summaryRow(label,value)).join('')}
   </div>
 
   ${advancedButton}
@@ -448,7 +516,12 @@ console.assert(ipToInt('192.168.1.1')===3232235777,'ipToInt failed');
 console.assert(intToIp(3232235777)==='192.168.1.1','intToIp failed');
 console.assert(isPrivate('192.168.1.1')===true,'private detection failed');
 console.assert(isShared('100.64.0.1')===true,'shared range detection failed');
+console.assert(isLinkLocal('169.254.1.1')===true,'link-local detection failed');
 console.assert(getClass('8.8.8.8')==='Class A','class detection failed');
+console.assert(getClass('172.16.0.1')==='Class B','Class B detection failed');
+console.assert(getClass('192.168.1.1')==='Class C','Class C detection failed');
+console.assert(getClass('224.0.0.1')==='Class D (Multicast)','Class D detection failed');
+console.assert(getClass('240.0.0.1')==='Class E (Reserved)','Class E detection failed');
 
 function init(){
   ipInputs().forEach(input=>input.addEventListener('paste',handlePaste));
